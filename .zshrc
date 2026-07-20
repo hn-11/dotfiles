@@ -4,7 +4,16 @@
 if type brew &>/dev/null; then
   FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
 fi
-fpath=(/Users/hn/.docker/completions $fpath)
+fpath=("$HOME/.docker/completions" $fpath)
+
+# gh / kubectl の補完はキャッシュ生成して fpath 経由で読む (起動高速化)
+# 更新したいときは: rm -rf ~/.cache/zsh/completions
+ZSH_COMP_CACHE="$HOME/.cache/zsh/completions"
+mkdir -p "$ZSH_COMP_CACHE"
+[[ -f "$ZSH_COMP_CACHE/_gh" ]] || gh completion -s zsh > "$ZSH_COMP_CACHE/_gh"
+[[ -f "$ZSH_COMP_CACHE/_kubectl" ]] || kubectl completion zsh > "$ZSH_COMP_CACHE/_kubectl"
+fpath=("$ZSH_COMP_CACHE" $fpath)
+
 autoload -Uz compinit
 compinit
 
@@ -26,16 +35,9 @@ eval "$(sheldon source)"
 eval "$(mise activate zsh)"
 
 # ====================
-# Tool completions (native zsh)
+# fzf (キーバインド + 補完)
 # ====================
-# fzf
 source <(fzf --zsh)
-
-# GitHub CLI
-source <(gh completion -s zsh)
-
-# Kubernetes (kubectl)
-source <(kubectl completion zsh)
 
 # ====================
 # fzf history search
@@ -51,6 +53,6 @@ bindkey '^r' fzf-select-history
 # ====================
 # PATH additions
 # ====================
-export PATH="/Users/hn/.antigravity/antigravity/bin:$PATH"
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 
 . "$HOME/.local/bin/env"
