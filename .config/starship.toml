@@ -99,14 +99,6 @@ format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
 
-[directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = " "
-"Pictures" = " "
-"Developer" = "󰲋 "
-"dev" = "󰲋 "
-
 [c]
 symbol = " "
 style = "bg:bg_center fg:fg_center_s"
