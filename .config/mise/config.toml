@@ -1,6 +1,6 @@
 [tools]
 go = "latest"
+golangci-lint = "latest"
+herdr = "latest"
 node = "lts"
-"npm:@google/gemini-cli" = "latest"
-"npm:@openai/codex" = "latest"
 uv = "latest"
