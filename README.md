@@ -11,9 +11,11 @@ macOS 用の個人設定ファイル。
 | `.config/sheldon/plugins.toml` | zsh プラグイン (autosuggestions, syntax-highlighting) |
 | `.config/mise/config.toml` | ランタイム (go, node, uv など) |
 | `.config/gh/config.yml` | GitHub CLI 設定 |
+| `.claude/settings.json` | Claude Code 設定 (プラグイン, hooks, effort など) |
 | `Brewfile` | Homebrew パッケージ一覧 |
 
 `gh/hosts.yml` は認証トークンを含むため追跡しない (gitignore 済み)。
+`~/.claude/` は `settings.json` だけを追跡する。認証情報・セッション履歴・プラグインキャッシュなどは対象外。
 
 ## セットアップ
 
@@ -35,4 +37,4 @@ mise install
 
 - 設定は `$HOME` 側を直接編集すればリンク経由でこのリポジトリに反映される。あとは commit するだけ
 - パッケージを追加したら `brew bundle dump --file=Brewfile --force` で Brewfile を更新
-- gh / kubectl の補完キャッシュを更新したいとき: `rm -rf ~/.cache/zsh/completions`
+- gh の補完キャッシュを更新したいとき: `rm -rf ~/.cache/zsh/completions`
