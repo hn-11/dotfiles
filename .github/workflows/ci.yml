@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # Homebrew や自作リポジトリのリリース側の変化で壊れていないかを定期的に確かめる
+  schedule:
+    - cron: "0 0 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: shellcheck ./*.sh
+      - name: actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+      - name: zsh syntax
+        run: |
+          sudo apt-get install -y -qq zsh
+          zsh -n .zshrc .zprofile
+
+  bootstrap:
+    strategy:
+      fail-fast: false
+      matrix:
+        # ubuntu は WSL (Ubuntu) の代わり
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTFILES_CI: "1"
+      # mise と install-assets.sh の GitHub API 呼び出しを未認証の回数制限に当てない
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - run: brew bundle list --all --file Brewfile.mac >/dev/null
+        if: runner.os == 'macOS'
+      - run: ./bootstrap.sh
+      - run: ./check.sh
+      - name: 2回目は何も変えずに終わること
+        run: ./install-assets.sh | tee out.txt && grep -c 'は導入済み' out.txt | grep -qx 2
