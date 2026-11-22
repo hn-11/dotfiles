@@ -27,6 +27,12 @@ fi
 brew bundle --file "$DOTFILES_DIR/Brewfile"
 "$DOTFILES_DIR/install.sh"
 
+# 初回のシェル起動でプラグインの clone が走らないよう先に取得しておく
+sheldon lock
+
+# Linuxbrew はグループ書き込み可能なディレクトリを作るため、compinit が「insecure directories」で止まる
+zsh -c 'autoload -Uz compaudit; compaudit' 2>/dev/null | xargs -r chmod go-w
+
 eval "$(mise activate bash --shims)"
 mise install
 
