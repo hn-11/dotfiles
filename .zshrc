@@ -9,7 +9,8 @@ fpath=("$HOME/.docker/completions" $fpath)
 # 更新したいときは: rm -rf ~/.cache/zsh/completions
 ZSH_COMP_CACHE="$HOME/.cache/zsh/completions"
 mkdir -p "$ZSH_COMP_CACHE"
-[[ -f "$ZSH_COMP_CACHE/_gh" ]] || gh completion -s zsh > "$ZSH_COMP_CACHE/_gh"
+# gh が無い環境で空ファイルをキャッシュしてしまわないよう存在確認する
+[[ -f "$ZSH_COMP_CACHE/_gh" ]] || ! (( $+commands[gh] )) || gh completion -s zsh > "$ZSH_COMP_CACHE/_gh"
 fpath=("$ZSH_COMP_CACHE" $fpath)
 
 autoload -Uz compinit
@@ -36,6 +37,12 @@ alias ls="eza --icons=auto"
 alias tree="ls --tree"
 alias claude="claude --dangerously-skip-permissions"
 alias agy="agy --dangerously-skip-permissions"
+# -pp = 装飾なし・ページャなし。cat の置き換えとしてパイプ/コピペで邪魔にならないように
+alias cat="bat -pp"
+
+# man をシンタックスハイライト付きで読む
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT="-c"
 
 # ====================
 # Shell enhancements
@@ -46,14 +53,28 @@ eval "$(sheldon source)"
 # ====================
 # fzf (Ctrl+R 履歴検索 / Ctrl+T ファイル / Alt+C cd + 補完)
 # ====================
+# 候補列挙を fd にして .gitignore を尊重しつつ隠しファイルも拾う
+export FZF_DEFAULT_COMMAND="fd --type f --hidden --follow --exclude .git"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="fd --type d --hidden --follow --exclude .git"
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border"
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:300 {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always --icons=auto {}'"
 source <(fzf --zsh)
 
 # ====================
 # PATH additions
 # ====================
-. "$HOME/.local/bin/env"
+# uv / Claude Code のインストーラが使う置き場。インストーラ生成の env ファイルは新環境に無いので直接書く
+[[ ":$PATH:" == *":$HOME/.local/bin:"* ]] || export PATH="$HOME/.local/bin:$PATH"
 
 # ====================
 # mise (version manager)
 # ====================
 eval "$(mise activate zsh)"
+
+# ====================
+# zoxide (z <キーワード> で頻用ディレクトリへ / zi で fzf 選択)
+# ====================
+# compinit より後・ファイル末尾で初期化するのが公式推奨
+eval "$(zoxide init zsh)"

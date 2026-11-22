@@ -1,0 +1,11 @@
+theme = one-dark-modern
+background = #000000
+background-opacity = 0.85
+background-blur-radius = 20
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+font-family = "Gengou Code JP Term NF"
+font-size = 18
+macos-titlebar-style = tabs
+term = xterm-256color
