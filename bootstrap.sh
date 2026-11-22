@@ -30,8 +30,11 @@ brew bundle --file "$DOTFILES_DIR/Brewfile"
 # 初回のシェル起動でプラグインの clone が走らないよう先に取得しておく
 sheldon lock
 
-# Linuxbrew はグループ書き込み可能なディレクトリを作るため、compinit が「insecure directories」で止まる
-zsh -c 'autoload -Uz compaudit; compaudit' 2>/dev/null | xargs -r chmod go-w
+# グループ書き込み可能な補完ディレクトリがあると compinit が「insecure directories」で止まる。
+# Linux では Linuxbrew 配下に加え root 所有の /usr/share/zsh が該当する環境もあるので sudo で直す
+chmod_cmd=(chmod go-w)
+[ "$OS" = Linux ] && chmod_cmd=(sudo chmod go-w)
+zsh -c 'autoload -Uz compaudit; compaudit' 2>/dev/null | xargs -r "${chmod_cmd[@]}"
 
 eval "$(mise activate bash --shims)"
 mise install
